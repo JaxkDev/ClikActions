@@ -1,0 +1,24 @@
+name: ClikActions
+main: Jackthehack21\ClikActions\Main
+version: 1.0.0-Beta1
+author: Jackthehack21
+api: 3.0.0
+
+commands:
+  actions:
+    permission: clikactions.command
+
+permissions:
+  clikactions:
+    default: op
+    description: All ClikAction permission nodes.
+    children:
+      clikactions.use:
+        default: true
+        description: Use actions placed on objects.
+      clikactions.command:
+        default: op
+        children:
+          clikactions.command.credits:
+            default: true
+            description: View plugin credits/info
