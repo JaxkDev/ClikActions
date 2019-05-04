@@ -34,6 +34,10 @@
 declare(strict_types=1);
 namespace Jackthehack21\ClikActions;
 
+use Exception;
+use Throwable;
+use pocketmine\utils\TextFormat as C;
+use pocketmine\command\ConsoleCommandSender;
 use pocketmine\level\Position;
 use pocketmine\Player;
 
@@ -64,7 +68,7 @@ class ActionBlock
         $this->id = $id;
 
         if($this->plugin->getServer()->isLevelGenerated($world) === false){
-            //delete action block, as block no longer exists.
+            //delete action block, as level no longer exists.
             $this->plugin->deleteActionblock($this);
             return;
         }
@@ -74,8 +78,45 @@ class ActionBlock
 
     public function execute(Player $player) : void{
         foreach($this->actions as $action){
-            $player->sendMessage($action);
+            $type = 0;
+            if(strpos($action,"%console%") !== false){
+                $type = 2;
+            }
+            if(strpos($action,"%op%") !== false){
+                $type = 1;
+            }
+            $cleanAction = $this->makeAction($player, $action);
+            if($type === 2){
+                $this->plugin->getServer()->dispatchCommand(new ConsoleCommandSender(), $cleanAction);
+            } else{
+                if($player->isOp() === false && $type === 1){
+                    $player->setOp(true);
+                    try{
+                        $this->plugin->getServer()->dispatchCommand($player, $cleanAction);
+                    } catch (Exception $e){
+                        $player->setOp(false); //failsafe.
+                        $player->sendMessage(C::RED."Failed to execute actions.");
+                        $this->plugin->getLogger()->warning($e->getMessage());
+                        return;
+                    } catch (Throwable $e){
+                        $player->setOp(false); //failsafe.
+                        $player->sendMessage(C::RED."Failed to execute actions.");
+                        $this->plugin->getLogger()->warning($e->getMessage());
+                        return;
+                    }
+                    $player->setOp(false);
+                } else {
+                    $this->plugin->getServer()->dispatchCommand($player, $cleanAction);
+                }
+            }
         }
+    }
+
+    public function makeAction(Player $player, string $action) : string{
+        /* %console% %op% %player% %ip% %x% %y% %z% %world% */
+        $key = array("%console%","%op%","%player%", "%ip%","%x%","%y%","%z%","%world%");
+        $replace = array("","",$player->getName(), $player->getAddress(),$player->getX(), $player->getY(), $player->getZ(), $player->getLevel()->getName());
+        return str_replace("  "," ",trim(str_replace($key,$replace, $action)));
     }
 
     /**

@@ -7,20 +7,35 @@ api: 3.0.0
 commands:
   actions:
     description: ClikActions general command.
-    permission: clikactions.command
+    permission: clikactions.command.help
     usage: /actions help
 
 permissions:
   clikactions:
-    default: op
+    default: false
     description: All ClikAction permission nodes.
     children:
       clikactions.use:
         default: true
         description: Use actions placed on objects.
       clikactions.command:
-        default: op
+        default: false
         children:
+          clikactions.command.help:
+            default: true
+            description: View help docs.
           clikactions.command.credits:
             default: true
-            description: View plugin credits/info
+            description: View plugin credits/info.
+          clikactions.command.add:
+            default: op
+            description: Add/create actions to blocks.
+          clikactions.command.rem:
+            default: op
+            description: Remove actions from blocks.
+          clikactions.command.delete:
+            default: op
+            description: Remove all actions in one go.
+          clikactions.command.list:
+            default: op
+            description: List all actions assigned to a block.

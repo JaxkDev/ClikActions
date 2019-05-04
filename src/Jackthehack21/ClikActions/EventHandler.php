@@ -35,6 +35,7 @@ declare(strict_types=1);
 namespace Jackthehack21\ClikActions;
 
 use pocketmine\command\CommandSender;
+use pocketmine\command\ConsoleCommandSender;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\event\player\PlayerInteractEvent;
@@ -59,9 +60,17 @@ class EventHandler implements Listener {
      * @return bool
      */
     public function handleCommand(CommandSender $sender, array $args) : bool{
+        if($sender instanceof ConsoleCommandSender){
+            $sender->sendMessage(C::RED."Command must be run in-game.");
+            return true;
+        }
         if(count($args) === 0) return false;
         switch(strtolower($args[0])) {
             case 'help':
+                if(!$sender->hasPermission("clikactions.command.help")){
+                    $sender->sendMessage(C::RED."You do not have permission to do that.");
+                    return true;
+                }
                 $sender->sendMessage(C::GREEN . "-- Help Docs --");
                 $sender->sendMessage(C::GRAY . "/actions add <action>");
                 $sender->sendMessage(C::GRAY . "/actions rem <action>");
@@ -71,16 +80,58 @@ class EventHandler implements Listener {
                 $sender->sendMessage(C::GRAY . "/actions credits");
                 break;
             case 'credits':
+                if(!$sender->hasPermission("clikactions.command.credits")){
+                    $sender->sendMessage(C::RED."You do not have permission to do that.");
+                    return true;
+                }
                 $sender->sendMessage(C::GREEN."--- ".C::GOLD."CREDITS".C::GREEN." ---");
                 $sender->sendMessage(C::RED."Developer  :: Jackthehack21/JaxkDev");
                 break;
             case 'list':
-                $sender->sendMessage(C::GOLD."Click a block to list their actions, or type cancel.");
+                if(!$sender->hasPermission("clikactions.command.list")){
+                    $sender->sendMessage(C::RED."You do not have permission to do that.");
+                    return true;
+                }
+                $sender->sendMessage(C::GOLD."Click a block to list their actions, or type 'cancel'.");
                 $this->plugin->interactCommand[strtolower($sender->getName())] = ["list"];
+                break;
+            case 'delete':
+                if(!$sender->hasPermission("clikactions.command.delete")){
+                    $sender->sendMessage(C::RED."You do not have permission to do that.");
+                    return true;
+                }
+                $sender->sendMessage(C::GOLD."Click a block to delete all actions applied to it, or type 'cancel'.");
+                $this->plugin->interactCommand[strtolower($sender->getName())] = ["delete"];
                 break;
             case 'new':
             case 'add':
-
+            case 'create':
+                if(!$sender->hasPermission("clikactions.command.add")){
+                    $sender->sendMessage(C::RED."You do not have permission to do that.");
+                    return true;
+                }
+                if(count($args) < 2){
+                    $sender->sendMessage(C::RED."Usage: ".C::GRAY."/actions add <action>");
+                    break;
+                }
+                array_shift($args);
+                $action = join(" ",$args);
+                $this->plugin->interactCommand[strtolower($sender->getName())] = ["add",$action];
+                $sender->sendMessage(C::GOLD."Click a block to add the command, or type 'cancel'.");
+                break;
+            case 'rem':
+                if(!$sender->hasPermission("clikactions.command.rem")){
+                    $sender->sendMessage(C::RED."You do not have permission to do that.");
+                    return true;
+                }
+                if(count($args) < 2){
+                    $sender->sendMessage(C::RED."Usage: ".C::GRAY."/actions rem <action>");
+                    break;
+                }
+                array_shift($args);
+                $action = join(" ", $args);
+                $this->plugin->interactCommand[strtolower($sender->getName())] = ["rem",$action];
+                $sender->sendMessage(C::GOLD."Click a block to remove the command, or type 'cancel'.");
                 break;
             default:
                 return false;
@@ -95,7 +146,7 @@ class EventHandler implements Listener {
         $player = $event->getPlayer();
         $msg = $event->getMessage();
         if(isset($this->plugin->interactCommand[strtolower($player->getName())])){
-            if(strtolower($msg) === "cancel"){
+            if(strtolower($msg) === "cancel" or strtolower($msg) === "cancel."){
                 unset($this->plugin->interactCommand[strtolower($player->getName())]);
                 $player->sendMessage(C::RED."Action cancelled.");
                 $event->setCancelled(true);
@@ -128,18 +179,45 @@ class EventHandler implements Listener {
                         $player->sendMessage(C::GREEN.$action);
                     }
                     break;
+                case 'delete':
+                    $actionBlock = $this->plugin->getActionByPosition($block->asPosition());
+                    if($actionBlock === null){
+                        $player->sendMessage(C::RED."That block has no actions to delete.");
+                        break;
+                    }
+                    $this->plugin->deleteActionblock($actionBlock);
+                    $player->sendMessage(C::GREEN."Actions for that block were successfully deleted.");
+                    break;
                 case 'add':
                     $actionBlock = $this->plugin->getActionByPosition($block->asPosition());
                     if($actionBlock === null){
-                        array_shift($args);
-                        $this->plugin->createActionblock($block->asPosition(), [join(" ",$args)]);
-                        $player->sendMessage(C::GREEN."Action '".join(" ", $args)."' added.");
+                        $this->plugin->createActionblock($block->asPosition(), [$args[1]]);
+                        $player->sendMessage(C::GREEN."Action '".$args[1]."' added.");
                         break;
                     } else {
-                        $actionBlock->actions[] = join(" ",$args);
-                        $player->sendMessage(C::GREEN."Action '".join(" ", $args)."' added.");
+                        $actionBlock->actions[] = $args[1];
+                        $player->sendMessage(C::GREEN."Action '".$args[1]."' added.");
                         break;
                     }
+                case 'rem':
+                    $actionBlock = $this->plugin->getActionByPosition($block->asPosition());
+                    if($actionBlock === null){
+                        $player->sendMessage(C::RED."That block has no actions to delete.");
+                        break;
+                    }
+                    $i = 0;
+                    foreach($actionBlock->actions as $action){
+                        if($action === $args[1]){
+                            unset($actionBlock->actions[$i]);
+                            $actionBlock->actions = array_values($actionBlock->actions);
+                            $player->sendMessage(C::GREEN."Action '".$args[1]."' removed.");
+                            $this->plugin->saveActions();
+                            return;
+                        }
+                        $i++;
+                    }
+                    $player->sendMessage(C::RED."Action '".$args[1]."' could not be found on this block, make sure it was typed exactly the same as said in /actions list");
+                    break;
                 default:
                     //shouldn't reach here.
                     $player->sendMessage(C::RED."Unknown command used on block.");

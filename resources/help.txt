@@ -1,0 +1,47 @@
+/**
+ *
+ *     /$$$$$$  /$$ /$$ /$$        /$$$$$$              /$$     /$$
+ *    /$$__  $$| $$|__/| $$       /$$__  $$            | $$    |__/
+ *   | $$  \__/| $$ /$$| $$   /$$| $$  \ $$  /$$$$$$$ /$$$$$$   /$$  /$$$$$$  /$$$$$$$   /$$$$$$$
+ *   | $$      | $$| $$| $$  /$$/| $$$$$$$$ /$$_____/|_  $$_/  | $$ /$$__  $$| $$__  $$ /$$_____/
+ *   | $$      | $$| $$| $$$$$$/ | $$__  $$| $$        | $$    | $$| $$  \ $$| $$  \ $$|  $$$$$$
+ *   | $$    $$| $$| $$| $$_  $$ | $$  | $$| $$        | $$ /$$| $$| $$  | $$| $$  | $$ \____  $$
+ *   |  $$$$$$/| $$| $$| $$ \  $$| $$  | $$|  $$$$$$$  |  $$$$/| $$|  $$$$$$/| $$  | $$ /$$$$$$$/
+ *    \______/ |__/|__/|__/  \__/|__/  |__/ \_______/   \___/  |__/ \______/ |__/  |__/|_______/
+ *
+ *   Copyright (C) 2019 Jackthehack21 (Jack Honour/Jackthehaxk21/JaxkDev)
+ *
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ *   Twitter :: @JaxkDev
+ *   Discord :: Jackthehaxk21#8860
+ *   Email   :: gangnam253@gmail.com
+ */
+
+This file is to help you with setting up commands using the correct formatting and tags that can be used.
+
+Command Tags:
+    %console% - add this anywhere in the action to make it run by console.
+    %op% - add this anywhere in the action to make it run by the user who pressed it (but they will be op when running the command)
+    You can only use one of the above in each action eg, /actions add %console% op %player%
+
+Variable Tags:
+    %player% - this is replaced with the players full name.
+    %ip% - this is replaced with the players IP address.
+    %x%
+    %y% - Each one represents the players coords.
+    %z%
+    %world% - replaced with the name of the world/level they are in.
+
+    (soon to come FactionsPRO (&FactionsPM), pureperms, EconomyAPI etc)

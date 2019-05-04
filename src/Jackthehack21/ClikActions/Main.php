@@ -46,14 +46,12 @@ class Main extends PluginBase{
     private static $instance;
 
     public const ActionsVersion = 0;
-    public const ConfigVersion = 0;
 
     /** @var Config */
     private $actionsC;
-    private $configC;
 
     /** @var ActionBlock[] */
-    public $actions = []; //list of all blocks, their position, name if set and actions on it.
+    public $actions = [];
 
     /** @var array */
     public $config = [];
@@ -66,9 +64,7 @@ class Main extends PluginBase{
         //todo sqlite.
         $this->actionsC = new Config($this->getDataFolder() . "actions.yml", Config::DETECT, ["version" => $this::ActionsVersion, "actions" => []]);
 
-        $this->saveResource("config.yml");
-        $this->configC = new Config($this->getDataFolder() . "config.yml", CONFIG::YAML);
-        $this->config = $this->configC->getAll();
+        $this->saveResource("help.txt");
     }
 
     private function init() : void{
@@ -87,7 +83,7 @@ class Main extends PluginBase{
         }
     }
 
-    private function saveActions() : void{
+    public function saveActions() : void{
         $actions = [];
         foreach($this->actions as $action){
             $actions[] = $action->toArray();
@@ -98,7 +94,7 @@ class Main extends PluginBase{
 
     public function onEnable() : void{
         self::$instance = $this;
-        $this->initResources(); //load all actions and config.
+        $this->initResources();
         $this->init();
     }
 
@@ -116,6 +112,7 @@ class Main extends PluginBase{
     public function createActionblock(Position $pos, array $actions, string $name = "null") : ActionBlock{
         $id = count($this->actions);
         $actionBlock = new ActionBlock($this, $name, [$pos->x,$pos->y,$pos->z], $pos->getLevel()->getName(), $actions, $id);
+        $this->actions[$id] = $actionBlock;
         $this->saveActions();
         return $actionBlock;
     }
