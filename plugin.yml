@@ -6,7 +6,9 @@ api: 3.0.0
 
 commands:
   actions:
+    description: ClikActions general command.
     permission: clikactions.command
+    usage: /actions help
 
 permissions:
   clikactions:

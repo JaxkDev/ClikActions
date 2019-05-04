@@ -34,25 +34,129 @@
 declare(strict_types=1);
 namespace Jackthehack21\ClikActions;
 
-use pocketmine\event\Listener;
+use pocketmine\command\Command;
+use pocketmine\command\CommandSender;
+use pocketmine\level\Position;
 use pocketmine\plugin\PluginBase;
+use pocketmine\utils\Config;
 
-class Main extends PluginBase implements Listener{
+class Main extends PluginBase{
 
     /** @var self */
     private static $instance;
 
-    private function initResources() : void{
+    public const ActionsVersion = 0;
+    public const ConfigVersion = 0;
 
+    /** @var Config */
+    private $actionsC;
+    private $configC;
+
+    /** @var ActionBlock[] */
+    public $actions = []; //list of all blocks, their position, name if set and actions on it.
+
+    /** @var array */
+    public $config = [];
+    public $interactCommand = []; //[playerName => command/args] used when adding rem listing actions.
+
+    /** @var EventHandler */
+    public $eventHandler;
+
+    private function initResources() : void{
+        //todo sqlite.
+        $this->actionsC = new Config($this->getDataFolder() . "actions.yml", Config::DETECT, ["version" => $this::ActionsVersion, "actions" => []]);
+
+        $this->saveResource("config.yml");
+        $this->configC = new Config($this->getDataFolder() . "config.yml", CONFIG::YAML);
+        $this->config = $this->configC->getAll();
     }
 
     private function init() : void{
+        $this->eventHandler = new EventHandler($this);
+        $this->getServer()->getPluginManager()->registerEvents($this->eventHandler, $this);
 
+        $this->loadActions();
+    }
+
+    public function loadActions() : void{
+        $id = 0;
+        $this->actions = [];
+        foreach($this->actionsC->get("actions") as $action){
+            $this->actions[] = new ActionBlock($this, $action["name"], $action["position"], $action["world"], $action["actions"], $id);
+            $id++;
+        }
+    }
+
+    private function saveActions() : void{
+        $actions = [];
+        foreach($this->actions as $action){
+            $actions[] = $action->toArray();
+        }
+        $this->actionsC->set("actions", $actions);
+        $this->actionsC->save();
     }
 
     public function onEnable() : void{
         self::$instance = $this;
         $this->initResources(); //load all actions and config.
         $this->init();
+    }
+
+    public function onDisable()
+    {
+        $this->saveActions();
+    }
+
+    /**
+     * @param Position $pos
+     * @param array $actions
+     * @param string $name
+     * @return ActionBlock
+     */
+    public function createActionblock(Position $pos, array $actions, string $name = "null") : ActionBlock{
+        $id = count($this->actions);
+        $actionBlock = new ActionBlock($this, $name, [$pos->x,$pos->y,$pos->z], $pos->getLevel()->getName(), $actions, $id);
+        $this->saveActions();
+        return $actionBlock;
+    }
+
+    public function deleteActionblock(ActionBlock $block) : void{
+        unset($this->actions[$block->id]);
+        $this->saveActions();
+        $this->loadActions();
+    }
+
+    /**
+     * @param int $id
+     * @return ActionBlock|null
+     */
+    public function getActionById(int $id){
+        if(!isset($this->actions[$id])) return null;
+        return $this->actions[$id];
+    }
+
+    /**
+     * @param Position $pos
+     * @return ActionBlock|null
+     */
+    public function getActionByPosition(Position $pos){
+        foreach($this->actions as $action){
+            if($action->position->equals($pos->asVector3()) && $action->position->getLevel()->getName() === $pos->getLevel()->getName()){
+                return $action;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param CommandSender $sender
+     * @param Command $command
+     * @param string $label
+     * @param array $args
+     * @return bool
+     */
+    public function onCommand(CommandSender $sender, Command $command, string $label, array $args): bool
+    {
+        return $this->eventHandler->handleCommand($sender, $args);
     }
 }

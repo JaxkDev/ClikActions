@@ -1,0 +1,157 @@
+<?php
+
+/**
+ *
+ *     /$$$$$$  /$$ /$$ /$$        /$$$$$$              /$$     /$$
+ *    /$$__  $$| $$|__/| $$       /$$__  $$            | $$    |__/
+ *   | $$  \__/| $$ /$$| $$   /$$| $$  \ $$  /$$$$$$$ /$$$$$$   /$$  /$$$$$$  /$$$$$$$   /$$$$$$$
+ *   | $$      | $$| $$| $$  /$$/| $$$$$$$$ /$$_____/|_  $$_/  | $$ /$$__  $$| $$__  $$ /$$_____/
+ *   | $$      | $$| $$| $$$$$$/ | $$__  $$| $$        | $$    | $$| $$  \ $$| $$  \ $$|  $$$$$$
+ *   | $$    $$| $$| $$| $$_  $$ | $$  | $$| $$        | $$ /$$| $$| $$  | $$| $$  | $$ \____  $$
+ *   |  $$$$$$/| $$| $$| $$ \  $$| $$  | $$|  $$$$$$$  |  $$$$/| $$|  $$$$$$/| $$  | $$ /$$$$$$$/
+ *    \______/ |__/|__/|__/  \__/|__/  |__/ \_______/   \___/  |__/ \______/ |__/  |__/|_______/
+ *
+ *   Copyright (C) 2019 Jackthehack21 (Jack Honour/Jackthehaxk21/JaxkDev)
+ *
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ *   Twitter :: @JaxkDev
+ *   Discord :: Jackthehaxk21#8860
+ *   Email   :: gangnam253@gmail.com
+ */
+
+declare(strict_types=1);
+namespace Jackthehack21\ClikActions;
+
+use pocketmine\command\CommandSender;
+use pocketmine\event\Listener;
+use pocketmine\event\player\PlayerChatEvent;
+use pocketmine\event\player\PlayerInteractEvent;
+use pocketmine\utils\TextFormat as C;
+
+class EventHandler implements Listener {
+    /** @var Main */
+    private $plugin;
+
+    /**
+     * EventHandler constructor.
+     * @param Main $plugin
+     */
+    public function __construct(Main $plugin)
+    {
+        $this->plugin = $plugin;
+    }
+
+    /**
+     * @param CommandSender $sender
+     * @param array $args
+     * @return bool
+     */
+    public function handleCommand(CommandSender $sender, array $args) : bool{
+        if(count($args) === 0) return false;
+        switch(strtolower($args[0])) {
+            case 'help':
+                $sender->sendMessage(C::GREEN . "-- Help Docs --");
+                $sender->sendMessage(C::GRAY . "/actions add <action>");
+                $sender->sendMessage(C::GRAY . "/actions rem <action>");
+                $sender->sendMessage(C::GRAY . "/actions delete");
+                $sender->sendMessage(C::GRAY . "/actions list");
+                $sender->sendMessage(C::GRAY . "/actions help");
+                $sender->sendMessage(C::GRAY . "/actions credits");
+                break;
+            case 'credits':
+                $sender->sendMessage(C::GREEN."--- ".C::GOLD."CREDITS".C::GREEN." ---");
+                $sender->sendMessage(C::RED."Developer  :: Jackthehack21/JaxkDev");
+                break;
+            case 'list':
+                $sender->sendMessage(C::GOLD."Click a block to list their actions, or type cancel.");
+                $this->plugin->interactCommand[strtolower($sender->getName())] = ["list"];
+                break;
+            case 'new':
+            case 'add':
+
+                break;
+            default:
+                return false;
+        }
+        return true;
+    }
+
+    /**
+     * @param PlayerChatEvent $event
+     */
+    public function onChat(PlayerChatEvent $event) : void{
+        $player = $event->getPlayer();
+        $msg = $event->getMessage();
+        if(isset($this->plugin->interactCommand[strtolower($player->getName())])){
+            if(strtolower($msg) === "cancel"){
+                unset($this->plugin->interactCommand[strtolower($player->getName())]);
+                $player->sendMessage(C::RED."Action cancelled.");
+                $event->setCancelled(true);
+            }
+        }
+    }
+
+    /**
+     * @param PlayerInteractEvent $event
+     */
+    public function onInteract(PlayerInteractEvent $event) : void{
+        if($event->getAction() !== PlayerInteractEvent::RIGHT_CLICK_BLOCK) return;
+        //todo config, specific side of block.
+
+        $player = $event->getPlayer();
+        $block = $event->getBlock();
+        if(isset($this->plugin->interactCommand[strtolower($player->getName())])){
+            $event->setCancelled(true);
+            $args = $this->plugin->interactCommand[strtolower($player->getName())];
+            unset($this->plugin->interactCommand[strtolower($player->getName())]);
+            switch($args[0]){
+                case 'list':
+                    $actionBlock = $this->plugin->getActionByPosition($block->asPosition());
+                    if($actionBlock === null){
+                        $player->sendMessage(C::RED."That block has no actions assigned.");
+                        break;
+                    }
+                    $player->sendMessage(C::GOLD."Actions for '".$actionBlock->name."':");
+                    foreach($actionBlock->actions as $action){
+                        $player->sendMessage(C::GREEN.$action);
+                    }
+                    break;
+                case 'add':
+                    $actionBlock = $this->plugin->getActionByPosition($block->asPosition());
+                    if($actionBlock === null){
+                        array_shift($args);
+                        $this->plugin->createActionblock($block->asPosition(), [join(" ",$args)]);
+                        $player->sendMessage(C::GREEN."Action '".join(" ", $args)."' added.");
+                        break;
+                    } else {
+                        $actionBlock->actions[] = join(" ",$args);
+                        $player->sendMessage(C::GREEN."Action '".join(" ", $args)."' added.");
+                        break;
+                    }
+                default:
+                    //shouldn't reach here.
+                    $player->sendMessage(C::RED."Unknown command used on block.");
+                    break;
+            }
+            return;
+        }
+
+        $actionBlock = $this->plugin->getActionByPosition($block->asPosition());
+        if($actionBlock === null) return;
+        $event->setCancelled(true);
+
+        $actionBlock->execute($player);
+    }
+}
