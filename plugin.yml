@@ -1,6 +1,6 @@
 name: ClikActions
 main: Jackthehack21\ClikActions\Main
-version: 1.0.0-Beta1
+version: 1.0.0-Beta2
 author: Jackthehack21
 api: 3.0.0
 
@@ -17,7 +17,7 @@ permissions:
     children:
       clikactions.use:
         default: true
-        description: Use actions placed on objects.
+        description: Use actions that are setup.
       clikactions.command:
         default: false
         children:
