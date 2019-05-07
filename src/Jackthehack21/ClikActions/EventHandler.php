@@ -160,7 +160,6 @@ class EventHandler implements Listener {
     public function onInteract(PlayerInteractEvent $event) : void{
         if($event->getAction() !== PlayerInteractEvent::RIGHT_CLICK_BLOCK) return;
         //todo config, specific side of block.
-
         $player = $event->getPlayer();
         $block = $event->getBlock();
         if(isset($this->plugin->interactCommand[strtolower($player->getName())])){
@@ -174,9 +173,15 @@ class EventHandler implements Listener {
                         $player->sendMessage(C::RED."That block has no actions assigned.");
                         break;
                     }
-                    $player->sendMessage(C::GOLD."Actions for '".$actionBlock->name."':");
+					if(count($actionBlock>actions) === 0){
+						//technically this should never happen, but just in case its user friendly.
+						$player->sendMessage(C::RED."This action block has no actions.");
+						break;
+					}
+                    $player->sendMessage(C::GOLD."Actions for '".$actionBlock->name."':"); 
+					//name is there for future and no need to add the value to existing data when it finally gets used with remoteactions.
                     foreach($actionBlock->actions as $action){
-                        $player->sendMessage(C::GREEN.$action);
+                        $player->sendMessage(C::GRAY."> ".C::GREEN.$action);
                     }
                     break;
                 case 'delete':
@@ -219,7 +224,7 @@ class EventHandler implements Listener {
                     $player->sendMessage(C::RED."Action '".$args[1]."' could not be found on this block, make sure it was typed exactly the same as said in /actions list");
                     break;
                 default:
-                    //shouldn't reach here.
+                    //shouldn't reach here, failsafe.
                     $player->sendMessage(C::RED."Unknown command used on block.");
                     break;
             }
@@ -228,6 +233,10 @@ class EventHandler implements Listener {
 
         $actionBlock = $this->plugin->getActionByPosition($block->asPosition());
         if($actionBlock === null) return;
+		if(!$player->hasPermission("clikactions.use")){
+            $player->sendMessage(C::RED."You do not have permission to use that action Block.");
+            return;
+        }
         $event->setCancelled(true);
 
         $actionBlock->execute($player);
