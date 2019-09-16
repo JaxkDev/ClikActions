@@ -11,7 +11,7 @@
  *   |  $$$$$$/| $$| $$| $$ \  $$| $$  | $$|  $$$$$$$  |  $$$$/| $$|  $$$$$$/| $$  | $$ /$$$$$$$/
  *    \______/ |__/|__/|__/  \__/|__/  |__/ \_______/   \___/  |__/ \______/ |__/  |__/|_______/
  *
- *   Copyright (C) 2019 Jackthehack21 (Jack Honour/Jackthehaxk21/JaxkDev)
+ *   Copyright (C) 2019 JaxkDev
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
  *
  *   Twitter :: @JaxkDev
  *   Discord :: Jackthehaxk21#8860
- *   Email   :: gangnam253@gmail.com
+ *   Email   :: JaxkDev@gmail.com
  */
 
 declare(strict_types=1);

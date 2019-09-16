@@ -1,10 +1,14 @@
 <a href="https://tiny.cc/JaxksDC"><img src="https://discordapp.com/api/guilds/554059221847638040/embed.png" alt="Discord server"/></a>
 
 # Clik'Actions
-Clik'Actions a plugin to place actions(/commands) on blocks, Pocketmine-MP Plugin by Jackthehack21.
+Clik'Actions a plugin to place actions(/commands) on blocks, Pocketmine-MP Plugin by JaxkDev.
 
-## NOTICE
- **This plugin is in BETA (Pre-Release), so *please* dont spam out comments/issues with broken things or things that you expect there and are not.**
+## NOTICE'S
+- **This plugin is in BETA (Pre-Release), so *please* dont spam out comments/issues with broken things or things that you expect there and are not.**
+
+- Beta2 will be released alongside PMMP 4.0 API
+- It will then add compatibility with InfoAPI by SOFe/SOF3
+ 
  
 ## Features
 ### Implemented
@@ -19,17 +23,17 @@ Clik'Actions a plugin to place actions(/commands) on blocks, Pocketmine-MP Plugi
 ## Known Bugs:
  - N/A
 
-To report bugs please make a issue over on [github](https://github.com/jackthehack21/ClikActions/issues/new) and please follow the guidelines.
+To report bugs please make a issue over on [github](https://github.com/JaxkDev/ClikActions/issues/new) and please follow the guidelines.
 
 ## Credits:
-_Developer:_ Jackthehack21 (aka JaxkDev)
+_Developer:_ JaxkDev
 
 _Other:_ CortexPE & 'Clik' (both who gave ideas for plugin name)
 
 
 ### License:
     Clik'Actions
-    Copyright (C) 2019 Jackthehack21 (Jack Honour/Jackthehaxk21/JaxkDev)
+    Copyright (C) 2019 JaxkDev
     
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -46,4 +50,4 @@ _Other:_ CortexPE & 'Clik' (both who gave ideas for plugin name)
     
     Twitter :: @JaxkDev
     Discord :: Jackthehaxk21#8860
-    Email   :: gangnam253@gmail.com
+    Email   :: JaxkDev@gmail.com
